@@ -30,16 +30,27 @@ public class Main {
                 case 2:
                     System.out.print("Enter deposite value: ");
                     double valueToDeposit = Double.parseDouble(scanner.nextLine());
-                    bankAccount.deposit(valueToDeposit);
+                    try {
+                        bankAccount.deposit(valueToDeposit);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid value input.");
+                    }
                     break;
                 case 3:
                     System.out.print("Enter withdraw value: ");
                     double valueToWithdraw = Double.parseDouble(scanner.nextLine());
-                    bankAccount.withdraw(valueToWithdraw);
+                    try {
+                        bankAccount.withdraw(valueToWithdraw);
+                    } catch (NumberFormatException e ) {
+                        System.out.println("Invalid withdraw input.");
+                    }
                     break;
                 case 4:
-                    System.exit(0);
+                    running = false;
+                    System.out.println("Goodbye!");
                     break;
+                default:
+                    System.out.println("Invalid choice. Try again");
             }
         }
 
