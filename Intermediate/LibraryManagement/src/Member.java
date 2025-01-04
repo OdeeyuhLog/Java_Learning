@@ -18,6 +18,6 @@ public class Member {
 
   @Override
   public String toString() {
-    return "Member ID: " + memberId + ", Member Name: " + memberName';
+    return "Member ID: " + memberId + ", Member Name: " + memberName;
   }
 }

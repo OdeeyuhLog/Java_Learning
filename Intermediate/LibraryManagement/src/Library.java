@@ -1,3 +1,5 @@
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -7,33 +9,36 @@ public class Library {
   private List<Book> books;
   private List<Transaction> records;
 
-  public void addBook(String bookName, String author, String bookId) {
+  private Random rand = new Random();
+
+  public Library() {
+    this.members = new ArrayList<>();
+    this.books = new ArrayList<>();
+    this.records = new ArrayList<>();
+  }
+
+  public void addBook(String bookName, String author) {
+    String bookId = String.format("%04d", rand.nextInt(10000));
     books.add(new Book(bookId, author, bookName));
   }
 
   public void addMember(String memberName) {
-    Random rand = new Random();
     String id = String.format("%04d", rand.nextInt(1000));
     members.add(new Member(memberName, id));
   }
 
-  public void deleteBook(String bookName) {
+  public void borrowBook(String bookName, String memberName) {
     try {
-      Book bookToDelete = books.stream().filter(book -> bookName.equals(book.getBookName())).findAny().orElse(null);
-      books.remove(bookToDelete);
-    } catch (Exception e) {
-      System.err.println("Book doesn't exist" + e.getMessage());
-    }
-  }
-
-  public void borrowBook(String bookName) {
-    try {
-      Book bookToBorrow = books.stream().filter(book -> bookName.equals(book.getBookName())).findAny().orElse(null);
-      if (bookToBorrow.isBorrowed) {
-        System.out.println("This book has already been borrowed. Wait for it to be returned.");
-      } else {
-        bookToBorrow.isBorrowed = true;
+      Book bookToBorrow = books.stream().filter(book -> bookName.equalsIgnoreCase(book.getBookName())).findAny()
+          .orElse(null);
+      Member borrowingMember = members.stream().filter(member -> memberName.equalsIgnoreCase(member.getMemberName()))
+          .findAny().orElse(null);
+      if (bookToBorrow != null && borrowingMember != null && bookToBorrow.isAvailable()) {
+        bookToBorrow.setAvailability(false);
+        addTransaction(bookToBorrow, borrowingMember, "Borrow");
         System.out.println("You have borrowed the book " + bookToBorrow.getBookName());
+      } else {
+        System.out.println("This book has already been borrowed. Wait for it to be returned.");
       }
 
     } catch (Exception e) {
@@ -41,11 +46,16 @@ public class Library {
     }
   }
 
-  public void returnBook(String bookName) {
+  public void returnBook(String bookName, String memberName) {
     try {
-      Book bookToReturn = books.stream().filter(book -> bookName.equals(book.getBookName())).findAny().orElse(null);
-      if (bookToReturn.isBorrowed) {
-        bookToReturn.isBorrowed = false;
+      Book bookToReturn = books.stream().filter(book -> bookName.equalsIgnoreCase(book.getBookName())).findAny()
+          .orElse(null);
+      Member returningMember = members.stream().filter(member -> memberName.equalsIgnoreCase(member.getMemberName()))
+          .findAny().orElse(null);
+
+      if (bookToReturn != null && !bookToReturn.isAvailable()) {
+        bookToReturn.setAvailability(true);
+        addTransaction(bookToReturn, returningMember, "Return");
         System.out.println("You have returned this book. Thank you for reading!");
       } else {
         System.out.println("Oh this book isn't even borrowed yet.");
@@ -56,8 +66,30 @@ public class Library {
     }
   }
 
-  public void addTransaction(String bookName, String memberName) {
+  public void addTransaction(Book book, Member member, String type) {
+    String id = String.format("%04d", rand.nextInt(10000));
+    records.add(new Transaction(book, member, id, LocalDateTime.now(), type));
+  }
 
+  public void displayAllBooks() {
+    System.out.println("All books in the library:");
+    for (Book book : books) {
+      System.out.println(book.toString());
+    }
+  }
+
+  public void displayAllMembers() {
+    System.out.println("All members of the library:");
+    for (Member member : members) {
+      System.out.println(member.toString());
+    }
+  }
+
+  public void displayAllTransaction() {
+    System.out.println("All transactions issued: ");
+    for (Transaction record : records) {
+      System.out.println(record.toString());
+    }
   }
 
 }
